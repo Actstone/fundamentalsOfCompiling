@@ -31,9 +31,11 @@
 		881A7848218D576F0060B3E7 /* Coperators.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = Coperators.txt; sourceTree = "<group>"; };
 		881A7849218D5D070060B3E7 /* readme.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = readme.txt; sourceTree = "<group>"; };
 		881A784A218D69EE0060B3E7 /* token.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = token.txt; sourceTree = "<group>"; };
-		88468B80219B092C000CA9D9 /* Ccount.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = Ccount.txt; sourceTree = "<group>"; };
+		8832150821A5881500FD5DC7 /* test.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = test.h; sourceTree = "<group>"; };
+		88B3951021A2D14900486EB6 /* grammar.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = grammar.txt; sourceTree = "<group>"; };
+		88D4B7AE21A93CF5005CFB17 /* recursiveSubroutine.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = recursiveSubroutine.h; sourceTree = "<group>"; };
 		88DEF0E0219FC1CB0082B105 /* cifaFenxi.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = cifaFenxi.h; sourceTree = "<group>"; };
-		88EDE3FB21907B2000BAEF1D /* Cidentifiter.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = Cidentifiter.txt; sourceTree = "<group>"; };
+		88DEF0E321A11EAA0082B105 /* LL1.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = LL1.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -73,9 +75,11 @@
 				881A7848218D576F0060B3E7 /* Coperators.txt */,
 				881A7849218D5D070060B3E7 /* readme.txt */,
 				881A784A218D69EE0060B3E7 /* token.txt */,
-				88EDE3FB21907B2000BAEF1D /* Cidentifiter.txt */,
-				88468B80219B092C000CA9D9 /* Ccount.txt */,
 				88DEF0E0219FC1CB0082B105 /* cifaFenxi.h */,
+				88DEF0E321A11EAA0082B105 /* LL1.h */,
+				88B3951021A2D14900486EB6 /* grammar.txt */,
+				8832150821A5881500FD5DC7 /* test.h */,
+				88D4B7AE21A93CF5005CFB17 /* recursiveSubroutine.h */,
 			);
 			path = FundamentalsOfCompiling;
 			sourceTree = "<group>";
