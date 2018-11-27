@@ -11,6 +11,8 @@ using namespace std;
 #define numOfIdentifiter 100
 class tokenMap{
 public:
+    int mapFlag = 0;
+    //按照cSource.txt的顺序处理，起到标记作用。注意，只对界符，标识符，常数相联系。
     map<int,char>charMap;//识别字符
     map<int,char>::iterator iterChar;
     

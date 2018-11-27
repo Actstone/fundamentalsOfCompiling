@@ -69,17 +69,17 @@
 			isa = PBXGroup;
 			children = (
 				881A783D218B196A0060B3E7 /* main.cpp */,
+				88DEF0E0219FC1CB0082B105 /* cifaFenxi.h */,
+				8832150821A5881500FD5DC7 /* test.h */,
+				88D4B7AE21A93CF5005CFB17 /* recursiveSubroutine.h */,
+				88DEF0E321A11EAA0082B105 /* LL1.h */,
+				88B3951021A2D14900486EB6 /* grammar.txt */,
+				881A784A218D69EE0060B3E7 /* token.txt */,
 				881A7845218B1A4D0060B3E7 /* Ckeywords.txt */,
 				881A7846218B1A980060B3E7 /* Cdelimiters.txt */,
 				881A7847218B1AD70060B3E7 /* Csource.txt */,
 				881A7848218D576F0060B3E7 /* Coperators.txt */,
 				881A7849218D5D070060B3E7 /* readme.txt */,
-				881A784A218D69EE0060B3E7 /* token.txt */,
-				88DEF0E0219FC1CB0082B105 /* cifaFenxi.h */,
-				88DEF0E321A11EAA0082B105 /* LL1.h */,
-				88B3951021A2D14900486EB6 /* grammar.txt */,
-				8832150821A5881500FD5DC7 /* test.h */,
-				88D4B7AE21A93CF5005CFB17 /* recursiveSubroutine.h */,
 			);
 			path = FundamentalsOfCompiling;
 			sourceTree = "<group>";
