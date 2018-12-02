@@ -6,9 +6,10 @@
 #include <cmath>
 #include <map>
 using namespace std;
-#define max1 100//假设 C 源程序中，不超过 lineNum 行。
-#define numOfCount 10 //假设文件中常数的个数。
+#define max1 100        //假设 C 源程序中，不超过 lineNum 行。
+#define numOfCount 10   //假设文件中常数的个数。
 #define numOfIdentifiter 100
+
 class tokenMap{
 public:
     int mapFlag = 0;
@@ -20,7 +21,10 @@ public:
     map<int, string>::iterator iterKeywords;
     
     map<int,double>countMap;//常数
-    map<int, double>::iterator iterCount;
+    map<int,double>::iterator iterCount;
+    
+    map<int,string>countStrMap;//以 string 类型储存常数
+    map<int,string>::iterator iterStrCount;
     
     map<int,string>operatorMap;//界符
     map<int, string>::iterator iterOper;
@@ -30,7 +34,17 @@ public:
     
     map<int,string>strMap;//字符串
     map<int, string>::iterator iterStr;
+    
+    int az_minusFlag = 0;//标识当减号出现在两个标识符之间
+    int brackets_minusFlag = 0;
+    
+    map<int , string>strSource;//以 string 形式顺序储存 Csource 文本。
+    map<int,string>::iterator iterStrSource;
+    
+    
 }tM;
+
+
 
 class middleVector{
 public:
@@ -46,7 +60,7 @@ public:
     string char_num="";
 }mV;
 
-int cifaFenxi(){
+void cifaFenxi(){
     map<int,string>mapStu;
     ofstream oftoken;oftoken.open("/Users/shiyi/Desktop/Actstone/FundamentalsOfCompiling/FundamentalsOfCompiling/token.txt",ios::out);
     if(!oftoken.is_open())exit(0);
@@ -59,14 +73,14 @@ int cifaFenxi(){
     for (int i=0;i<num_keywords;i++){
         fkey>>char_key[i];
         //cout<<char_key[i]<<endl;//char_keys[i][0]表示每一个关键字的第一个字母。
-        str_key = str_key + char_key[i]+"*";//将关键字以 string 写入 str_key
+        str_key = str_key + char_key[i]+"^";//将关键字以 string 写入 str_key
         if(8-char_key[i].length()>0){
             for(int j=0;j<8-char_key[i].length();j++){
-                str_key = str_key + "*";
+                str_key = str_key + "^";
             }
         }
     }
-    str_key="*"+str_key;
+    str_key="^"+str_key;
     /*for(int ffff =0;ffff<str_key.length();ffff++){
      cout<<str_key[ffff]<<endl;
      }*/
@@ -83,7 +97,7 @@ int cifaFenxi(){
         //cout<<char_delimiters[i]<<endl;
         str_delimiter=str_delimiter+char_delimiters[i]+" ";
     }
-    //cout<<str_delimiter<<str_delimiter.length()<<endl;
+    //cout<<str_delimiter<<str_delimiter.length()<<" "<<str_delimiter[2]<<endl;
     fdelimilter.close();
     //将写在文本中的运算符读入到 char_operators 中。
     ifstream foperator;foperator.open("/Users/shiyi/Desktop/Actstone/FundamentalsOfCompiling/FundamentalsOfCompiling/Coperators.txt");
@@ -121,37 +135,22 @@ int cifaFenxi(){
         }//cout<<lineNum<<endl;
         c_source[i]=c_source[i]+'\n';
         str_source=str_source+c_source[i];
-        //fsource>>c_source[i];
-        //cout<<c_source[i]<<endl;
-        /*if(c_source[i].length()!=0){
-         cout<<" *"<<c_source[i].length()<<endl;
-         }*/
-        /*if(c_source[i].length()==1){//1表示换行
-            source_line=i;
-            //cout<<source_line<<endl;
-            break;
-        }*/
+        
     }
-    //cout<<"********************"<<endl;
-   /*for(int i=0;i<str_source.length();i++){
-        cout<<str_source[i]<<endl;
-    }*/
-
-    /*for(tM.iterStr = tM.strMap.begin();tM.iterStr != tM.strMap.end();tM.iterStr ++){
-        cout<<tM.iterStr->first<<" "<<tM.iterStr->second<<endl;
-    }*/
-    //对 C 源程序进行处理。
-    int countFlag = 0;
+    
+    //int countFlag = 0;
     /*
      当 countFlag 为0时，表示还没有常数读入到oFCount[]中，故此时不用判断新读到的常数是否已经在oFCount[] 里面;当 countFlag 不为 0 时，需要判断一下，若 oFCount[]中没有，则将新读取到的数写入到 oFCount[] 中。
      */
-    int identifiterFlag =0;//道理同上。
+    //int identifiterFlag =0;//道理同上。
     int strFlag=0;
     int doublequotesIndicator=0;
     int charFlag=0;
+    
+    tM.mapFlag = 0;
+    
     for(int i=0;i<str_source.length();i++){
         //cout<<str_source[i]<<endl;
-        
         if(str_source[i]=='/'&&str_source[i+1]=='/'){// 若遇到 // ,直接跳过该行。
             i=i+2;
             while(str_source[i]!='\n'){
@@ -189,41 +188,41 @@ int cifaFenxi(){
             }i+=1;continue;
         }
         //识别字符串识别字符串识别字符串识别字符串识别字符串
-            string strMiddle="";
-            if(str_source[i]=='"'){
-                doublequotesIndicator+=1;
-                if(doublequotesIndicator%2!=0){
-                    i+=1;
-                    while(str_source[i]!='"'){
-                        strMiddle=strMiddle+str_source[i];i+=1;
-                        if(str_source[i]=='\0'){
-                            break;
+        string strMiddle="";
+        if(str_source[i]=='"'){
+            doublequotesIndicator+=1;
+            if(doublequotesIndicator%2!=0){
+                i+=1;
+                while(str_source[i]!='"'){
+                    strMiddle=strMiddle+str_source[i];i+=1;
+                    if(str_source[i]=='\0'){
+                        break;
+                    }
+                }doublequotesIndicator+=1;//此时的 i 指示的是字符串后面的引号，所以将 yinhaoZhishi 加1。当 i 返回的 for 循环时，直接加1，只是引号后面的字符。
+                if(strFlag==0){
+                    tM.strMap[strFlag]=strMiddle;
+                    //cout<<tM.strMap[strFlag]<<" {s, "<<strFlag<<"}"<<endl;
+                    strFlag+=1;
+                }
+                if(strFlag!=0){
+                    int str_fl_ag =0;
+                    for(int sF =0;sF<strFlag;sF++){
+                        if(strMiddle==tM.strMap[sF]){
+                            str_fl_ag+=1;break;
                         }
-                    }doublequotesIndicator+=1;//此时的 i 指示的是字符串后面的引号，所以将 yinhaoZhishi 加1。当 i 返回的 for 循环时，直接加1，只是引号后面的字符。
-                    if(strFlag==0){
+                    }
+                    if(str_fl_ag==0){
                         tM.strMap[strFlag]=strMiddle;
                         //cout<<tM.strMap[strFlag]<<" {s, "<<strFlag<<"}"<<endl;
                         strFlag+=1;
                     }
-                    if(strFlag!=0){
-                        int str_fl_ag =0;
-                        for(int sF =0;sF<strFlag;sF++){
-                            if(strMiddle==tM.strMap[sF]){
-                                str_fl_ag+=1;break;
-                            }
-                        }
-                        if(str_fl_ag==0){
-                            tM.strMap[strFlag]=strMiddle;
-                            //cout<<tM.strMap[strFlag]<<" {s, "<<strFlag<<"}"<<endl;
-                            strFlag+=1;
-                        }
-                    }
                 }
             }
+        }
         
         
         //识别错误的标识符。识别错误的标识符。识别错误的标识符。识别错误的标识符。识别错误的标识符。
-        if('0'<=str_source[i]&&str_source[i]<='9'&&(str_source[i-1]==' '||str_source[i-1]=='+'||str_source[i-1]=='-'||str_source[i-1]=='*'||str_source[i-1]=='/')&&((str_source[i+1]<'e'&&str_source[i+1]>='a')||(str_source[i+1]>'e'&&str_source[i+1]<='z')||(str_source[i+1]>='A'&&str_source[i+1]<='Z'))){
+        /*if('0'<=str_source[i]&&str_source[i]<='9'&&(str_source[i-1]==' '||str_source[i-1]=='+'||str_source[i-1]=='-'||str_source[i-1]=='*'||str_source[i-1]=='/')&&((str_source[i+1]<'e'&&str_source[i+1]>='a')||(str_source[i+1]>'e'&&str_source[i+1]<='z')||(str_source[i+1]>='A'&&str_source[i+1]<='Z'))){
             
             cout<<str_source[i]<<str_source[i+1]<<" is wrong indentifiter!"<<endl;
             
@@ -232,9 +231,9 @@ int cifaFenxi(){
             }
             i=i-1;
             continue;
-        }
+        }*/
         //识别常数。识别常数。识别常数。识别常数。识别常数。识别常数。识别常数。识别常数。识别常数。
-        {
+        
             mV.char_num="";
             mV.num_n=0;
             mV.num_p=0;int p_flag=0;
@@ -243,41 +242,75 @@ int cifaFenxi(){
             mV.num_e=1;
             mV.num_state=1;//若为1，表示正数。-1为负数。
             string char_num="";
+            int minusNum = 0;//判断第几次出现负号
+            if(('0'<=str_source[i]&&str_source[i]<='9')||(str_source[i]=='-'))
+            //当扫描到一个字符为0~9或者为-，进入常数判断。
+           /* if((('0'<=str_source[i]&&str_source[i]<='9')&&str_source[i-1]=='=')||(str_source[i]=='-'&&(str_source[i-1]=='='||str_source[i-1]=='\n'))||(('0'<=str_source[i]&&str_source[i]<='9')&&str_source[i-1]=='['))*/
             
-            if((('0'<=str_source[i]&&str_source[i]<='9')&&str_source[i-1]=='=')||(str_source[i]=='-'&&(str_source[i-1]=='='||str_source[i-1]=='\n'))||(('0'<=str_source[i]&&str_source[i]<='9')&&str_source[i-1]=='[')){
+            {
+                if(str_source[i]=='-'){
+                    if((str_source[i+1]<='z'&&str_source[i+1]>='a')||
+                       (str_source[i+1]<='Z'&&str_source[i+1]>='A')){
+                        //这种情况识别减号。
+                        tM.az_minusFlag +=1;
+                        continue;
+                    }
+                    if(str_source[i+1]=='('){
+                        tM.brackets_minusFlag +=1;
+                        continue;
+                    }
+                }
                 
-                while (('0'<=str_source[i]&&str_source[i]<='9')||str_source[i]=='e'||str_source[i]=='-'||str_source[i]=='+'||str_source[i]=='.') {
-                    if(str_source[i]=='-'&&str_source[i-1]=='='){
-                        mV.char_num=mV.char_num+"-";
-                        mV.num_state=-1;
-                        i+=1;
+                while (('0'<=str_source[i]&&str_source[i]<='9')||
+                       str_source[i]=='e'||
+                       str_source[i]=='-'||
+                       str_source[i]=='.')
+                {
+                    if(str_source[i]=='-'){
+                        if(str_source[i-1]>='0'&&str_source[i-1]<='9'){
+                            break;
+                        }
+                        if(str_source[i-1]!='e'){
+                            mV.char_num=mV.char_num+"-";
+                            mV.num_state=-1;
+                            i+=1;
+                            minusNum +=1;
+                            continue;
+                        }
+                        if(str_source[i-1]=='e'){
+                            mV.char_num=mV.char_num+"-";
+                            mV.num_e=-1;
+                            i+=1;//MV.num_e 初始值为 1
+                            minusNum +=1;
+                            continue;
+                        }
+                        if(minusNum>1){
+                            break;
+                        }
                     }
                     if (str_source[i]=='e') {
                         mV.char_num=mV.char_num+"e";
-                        mV.num_p=1;i+=1;p_flag=1;
+                        mV.num_p=1;i+=1;p_flag=1;continue;
                     }
                     if(str_source[i]=='.'){
                         mV.char_num=mV.char_num+".";
-                        mV.num_t=1;i+=1;
+                        mV.num_t=1;i+=1;continue;
                     }
-                    if(str_source[i]=='-'&&str_source[i-1]!='='){
-                        mV.char_num=mV.char_num+"-";
-                        mV.num_e=-1;i+=1;//MV.num_e 初始值为 1
-                    }
+                    
                     if ('0'<=str_source[i]&&str_source[i]<='9') {
                         string str_source_one="";
                         if(mV.num_p==0&&mV.num_t==0){
                             mV.char_num=mV.char_num+str_source[i];
                             str_source_one = str_source_one + str_source[i];
                             mV.num_n=mV.num_n*10+stoi(str_source_one);
-                            i+=1;
+                            i+=1;continue;
                         }
                         if(mV.num_p==0&&mV.num_t==1){
                             mV.char_num=mV.char_num+str_source[i];
                             str_source_one = str_source_one + str_source[i];
                             mV.num_n=mV.num_n*10+stoi(str_source_one);
                             mV.num_m=mV.num_m+1;
-                            i+=1;
+                            i+=1;continue;
                         }
                         if(mV.num_p>0&&mV.num_t==0){
                             if(mV.num_p==1&&p_flag==1){
@@ -286,7 +319,7 @@ int cifaFenxi(){
                             mV.char_num=mV.char_num+str_source[i];
                             str_source_one = str_source_one + str_source[i];
                             mV.num_p=mV.num_p*10+stoi(str_source_one);
-                            i+=1;
+                            i+=1;continue;
                         }
                         if(mV.num_p>0&&mV.num_t==1){
                             if(mV.num_p==1&&p_flag==1){
@@ -295,147 +328,243 @@ int cifaFenxi(){
                             mV.char_num=mV.char_num+str_source[i];
                             str_source_one = str_source_one + str_source[i];
                             mV.num_p=mV.num_p*10+stoi(str_source_one);
-                            i+=1;
+                            i+=1;continue;
                         }
                     }
                 }//while
-                if(countFlag == 0){
-                    tM.countMap[countFlag]=mV.num_state*mV.num_n*pow(10, mV.num_e*mV.num_p-mV.num_m);
-                    //oF.oFCount[countFlag]=mV.num_state*mV.num_n*pow(10, mV.num_e*mV.num_p-mV.num_m);
-                    countFlag +=1;
-                    //cout<<mV.char_num<<"  {c, "<<countFlag<<"} "<<mV.num_state*mV.num_n*pow(10, mV.num_e*mV.num_p-mV.num_m)<<endl;
-                    i=i-1;
-                    continue;
-                }
-                if(countFlag!=0){
-                    int f_l_a_g =0;
-                    for(int cF = 0;cF<countFlag;cF++){
-                        if (mV.num_state*mV.num_n*pow(10, mV.num_e*mV.num_p-mV.num_m)==tM.countMap[cF]) {
-                            f_l_a_g +=1;break;
-                        }
-                    }
-                    if(f_l_a_g ==0){
-                        tM.countMap[countFlag]=mV.num_state*mV.num_n*pow(10, mV.num_e*mV.num_p-mV.num_m);
-                        countFlag +=1;
-                        
+                //这里考虑如何结束常数判断。可能不全。
+                if ((str_source[i] == ','||
+                     str_source[i]==';'||
+                     str_source[i] == ')'||
+                     str_source[i] == '('||
+                     str_source[i] == '+'||
+                     str_source[i] == '-'||
+                     str_source[i] == '*'||
+                     str_source[i] == '/'||
+                     str_source[i] == ']'||
+                     str_source[i] == '['||
+                     str_source[i] == '#'||
+                     str_source[i] == '%'||
+                     str_source[i]==' ')
+                    &&(str_source[i-2]!='_')
+                    &&(str_source[i-2]<'a'||
+                       str_source[i-2]>'z')
+                    &&(str_source[i-2]<'A'||
+                       str_source[i-2]>'Z')) {
+                    tM.countMap[tM.mapFlag]=mV.num_state*mV.num_n*pow(10, mV.num_e*mV.num_p-mV.num_m);
+                        tM.countStrMap[tM.mapFlag]=mV.char_num;
+                        tM.strSource[tM.mapFlag]=mV.char_num;
+                        tM.mapFlag +=1;
+            
+                   /*
+                    if(countFlag == 0){
+                        tM.countMap[tM.mapFlag]=mV.num_state*mV.num_n*pow(10, mV.num_e*mV.num_p-mV.num_m);
+                        //oF.oFCount[countFlag]=mV.num_state*mV.num_n*pow(10, mV.num_e*mV.num_p-mV.num_m);
+                        countFlag +=1;tM.mapFlag +=1;
                         //cout<<mV.char_num<<"  {c, "<<countFlag<<"} "<<mV.num_state*mV.num_n*pow(10, mV.num_e*mV.num_p-mV.num_m)<<endl;
                         i=i-1;
                         continue;
                     }
+                    if(countFlag!=0){
+                        int f_l_a_g =0;
+                        for(int cF = 0;cF<=tM.mapFlag;cF++){
+                            if (mV.num_state*mV.num_n*pow(10, mV.num_e*mV.num_p-mV.num_m)==tM.countMap[cF]) {
+                                
+                                f_l_a_g +=1;break;
+                            }
+                        }
+                        if(f_l_a_g ==0){
+                            tM.countMap[tM.mapFlag]=mV.num_state*mV.num_n*pow(10, mV.num_e*mV.num_p-mV.num_m);
+                            tM.mapFlag +=1;
+                            countFlag +=1;
+                            
+                            //cout<<mV.char_num<<"  {c, "<<countFlag<<"} "<<mV.num_state*mV.num_n*pow(10, mV.num_e*mV.num_p-mV.num_m)<<endl;
+                            i=i-1;
+                            continue;
+                        }
+                    }*/
                 }
+                
             }
             
-        }
+        
         //识别关键字和标识符。识别关键字和标识符。识别关键字和标识符。识别关键字和标识符。识别关键字和标识符。
         {
-            if(str_source[i]=='_' || ('a'<=str_source[i] && str_source[i]<='z') ||('A'<=str_source[i] && str_source[i]<='Z')||('0'<=str_source[i]&&str_source[i]<='9'&&(str_source[i-1]=='_'||(('a'<=str_source[i-1] && str_source[i-1]<='z') ||('A'<=str_source[i-1] && str_source[i-1]<='Z'))))){
-                mV.flag_key_indentifiter = 1;
-                mV.identifier_middle_vector=mV.identifier_middle_vector+str_source[i];
+            if(tM.az_minusFlag ==1){
+                i-=1;
             }
+            if(str_source[i]=='_'||
+               ('a'<=str_source[i] && str_source[i]<='z')||
+               ('A'<=str_source[i] && str_source[i]<='Z')||
+               ('0'<=str_source[i]
+                &&str_source[i]<='9'
+                &&(str_source[i-1]=='_'||
+                   (('a'<=str_source[i-1]
+                     && str_source[i-1]<='z')||
+                    ('A'<=str_source[i-1]
+                     && str_source[i-1]<='Z'))))){
+                mV.flag_key_indentifiter = 1;
+                        
+                mV.identifier_middle_vector=mV.identifier_middle_vector+str_source[i];
+                        
+                    }
             else{
                 //cout<<MV.identifier_middle_vector<<endl;
                 if(mV.identifier_middle_vector!=""){
                     string::size_type idx_keywords=0;
-                    idx_keywords=str_key.find("*"+mV.identifier_middle_vector+"*");
+                    idx_keywords=str_key.find("^"+mV.identifier_middle_vector+"^");
                     if(0<=idx_keywords && idx_keywords<=str_key.length()){
                         tM.keyMap[(int)idx_keywords/9+1]=mV.identifier_middle_vector;
                         //cout<<mV.identifier_middle_vector<<"  {k, "<<idx_keywords/9+1<<"}"<<endl;
                     }else{
+                        tM.identifiterMap[tM.mapFlag]=mV.identifier_middle_vector;
+                        tM.strSource[tM.mapFlag]=mV.identifier_middle_vector;
+                        tM.mapFlag +=1;
+                        
+                        /*
                         if(identifiterFlag==0){
-                            tM.identifiterMap[identifiterFlag]=mV.identifier_middle_vector;
+                            tM.identifiterMap[tM.mapFlag]=mV.identifier_middle_vector;
+                            tM.mapFlag +=1;
                             identifiterFlag +=1;
                             //cout<<mV.identifier_middle_vector<<"  {i, "<<identifiterFlag<<"}"<<endl;
                         }
                         if(identifiterFlag!=0){
                             int fl_ag=0;
-                            for(int iF =0;iF<identifiterFlag;iF++){
+                            for(int iF =0;iF<=tM.mapFlag;iF++){
                                 if(mV.identifier_middle_vector == tM.identifiterMap[iF]){
                                     fl_ag+=1;break;
                                 }
                             }
                             if(fl_ag==0){
-                                tM.identifiterMap[identifiterFlag]=mV.identifier_middle_vector;
+                                tM.identifiterMap[tM.mapFlag]=mV.identifier_middle_vector;
+                                tM.mapFlag+=1;
                                 identifiterFlag+=1;
                                 //cout<<mV.identifier_middle_vector<<"  {i, "<<identifiterFlag<<"}"<<endl;
                             }
-                        }
+                        }*/
                     }
                     mV.identifier_middle_vector="";
+                    if(tM.az_minusFlag==1){
+                        tM.az_minusFlag =0;
+                    }
                 }
             }
         }
-    }
-    ////识别运算符。识别运算符。识别运算符。识别运算符。识别运算符。识别运算符。识别运算符。
-    for(int i=0;i<str_source.length();i++){
+    
         string operator_middle_vector3="";
         string operator_middle_vector2="";
         string operator_middle_vector1="";
-        while(str_source[i]=='-'||str_source[i]=='~'||str_source[i]=='+'||str_source[i]=='*'||str_source[i]=='/'||str_source[i]=='&'||str_source[i]=='%'||str_source[i]=='<'||str_source[i]=='>'||str_source[i]=='='||str_source[i]=='!'||str_source[i]=='^'||str_source[i]=='|'||str_source[i]=='?'){
+        while(str_source[i]=='-'
+              ||str_source[i]=='~'
+              ||str_source[i]=='+'
+              ||str_source[i]=='*'
+              ||str_source[i]=='/'
+              ||str_source[i]=='&'
+              ||str_source[i]=='%'
+              ||str_source[i]=='<'
+              ||str_source[i]=='>'
+              ||str_source[i]=='='
+              ||str_source[i]=='!'
+              ||str_source[i]=='^'
+              ||str_source[i]=='|'
+              ||str_source[i]=='?')
+        {
             operator_middle_vector1=str_source[i];//判断由1个符号组成的运算符
             operator_middle_vector2=operator_middle_vector1+str_source[i+1];//判断由2个符号组成的运算符
             operator_middle_vector3=operator_middle_vector2+str_source[i+2];//判断由3个b符号组成的运算符
-            if(operator_middle_vector2=="//"||operator_middle_vector2=="/*"||operator_middle_vector2=="*/"||operator_middle_vector2=="\n"){//将界符排除,为了减少机器运行时的压力。
+            if(operator_middle_vector2=="//"||
+               operator_middle_vector2=="/*"||
+               operator_middle_vector2=="*/"||
+               operator_middle_vector2=="\n")
+            {//将界符排除,为了减少机器运行时的压力。
                 i+=1;
                 break;
             }
-            if(0<str_operator.find("$"+operator_middle_vector3+"$")&&str_operator.find("$"+operator_middle_vector3+"$")<str_operator.length()){
-                tM.operatorMap[(int)str_operator.find("$"+operator_middle_vector3+"$")/4+1]=operator_middle_vector3;
+            if(0<str_operator.find("$"+operator_middle_vector3+"$")
+               &&str_operator.find("$"+operator_middle_vector3+"$")<str_operator.length()){
+                tM.operatorMap[tM.mapFlag]=operator_middle_vector3;
+                tM.strSource[tM.mapFlag]=operator_middle_vector3;
                 //cout<<operator_middle_vector3<<"  {o, "<<str_operator.find("$"+operator_middle_vector3+"$")/4+1<<"{"<<endl;
+                tM.mapFlag +=1;
                 i=i+2;break;
             }
-            if (0<str_operator.find("$"+operator_middle_vector2+"$")&&str_operator.find("$"+operator_middle_vector2+"$")<str_operator.length()) {
-                tM.operatorMap[(int)str_operator.find("$"+operator_middle_vector2+"$")/4+1]=operator_middle_vector2;
+            if (0<str_operator.find("$"+operator_middle_vector2+"$")
+                &&str_operator.find("$"+operator_middle_vector2+"$")<str_operator.length()) {
+                tM.operatorMap[tM.mapFlag]=operator_middle_vector2;
+                tM.strSource[tM.mapFlag]=operator_middle_vector2;
                 //cout<<operator_middle_vector2<<"  {o, "<<str_operator.find("$"+operator_middle_vector2+"$")/4+1<<"}"<<endl;
+                tM.mapFlag+=1;
                 i=i+1;break;
             }
-            if (0<str_operator.find("$"+operator_middle_vector1+"$")&&str_operator.find("$"+operator_middle_vector1+"$")<str_operator.length()){
-                tM.operatorMap[(int)str_operator.find("$"+operator_middle_vector1+"$")/4+1]=operator_middle_vector1;
+            if (0<str_operator.find("$"+operator_middle_vector1+"$")
+                &&str_operator.find("$"+operator_middle_vector1+"$")<str_operator.length()){
+                tM.operatorMap[tM.mapFlag]=operator_middle_vector1;
+                tM.strSource[tM.mapFlag]=operator_middle_vector1;
                 //cout<<operator_middle_vector1<<"  {o, "<<str_operator.find("$"+operator_middle_vector1+"$")/4+1<<"}"<<endl;
+                tM.mapFlag += 1;
                 break;
             }
         }
-    }
-    for(int i=0;i<lineNum;i++){
-        for(int j=0;j<c_source[i].length();j++){
-            //cout<<c_source[i][j]<<endl;
-            {//查找源程序中的界符。
-                string::size_type idx_delimiter=0;
-                //size_type类型定义为与unsigned型（unsigned int 或 unsigned long）具有相同含义。且可以保证足够大能够存储任意string对象的长度
-                if(c_source[i][j]!='/'&&c_source[i][j]!='*'&&c_source[i][j]!=' '){
-                    //这两个符号在运算符中也有，且出现在第一个字母中。而判断不等于空格是因为在 str_delimiter 中存在空格。
-                    idx_delimiter = str_delimiter.find(c_source[i][j]);
-                    
-                    if(0<=idx_delimiter && idx_delimiter<=23){
-                        //cout<<"idx_delimiter="<<idx_delimiter<<endl;
-                        tM.operatorMap[(int)(idx_delimiter+2)/2+33]=c_source[i][j];
-                        //cout<<c_source[i][j]<<"  {p, "<<(idx_delimiter+2)/2<<"}"<<endl;
-                    }
-                }
-                if(c_source[i][j]=='/'){
-                    if(c_source[i][j+1]=='/'){
-                        idx_delimiter = str_delimiter.find("//");
-                        tM.operatorMap[(int)(idx_delimiter+2)/2+33]="//";
-                        //cout<<"//"<<"  {p, "<<(idx_delimiter+2)/2<<"}"<<endl;
-                    }
-                    if(c_source[i][j+1]=='*'){
-                        idx_delimiter = str_delimiter.find("/*");
-                        tM.operatorMap[(int)(idx_delimiter+2)/2+33]="/*";
-                        //cout<<"/*"<<"  {p, "<<(idx_delimiter+2)/2<<"}"<<endl;
-                    }
-                }
-                if(c_source[i][j]=='*'){
-                    if(c_source[i][j+1]=='/'){
-                        idx_delimiter = str_delimiter.find("*/");
-                        tM.operatorMap[(int)(idx_delimiter+2)/2+33]="*/";
-                        //cout<<"*/"<<"  {p, "<<(idx_delimiter+2)/2-1<<"}"<<endl;
-                    }
-                }
-                continue;
-            }
-        }
-    }
-    fsource.close();
     
+        //cout<<c_source[i][j]<<endl;
+        {//查找源程序中的界符。
+            string::size_type idx_delimiter=0;
+            //size_type类型定义为与unsigned型（unsigned int 或 unsigned long）具有相同含义。且可以保证足够大能够存储任意string对象的长度
+            if(str_source[i]!='/'
+               &&str_source[i]!='*'
+               &&str_source[i]!=' '){
+                //这两个符号在运算符中也有，且出现在第一个字母中。而判断不等于空格是因为在 str_delimiter 中存在空格。
+                idx_delimiter = str_delimiter.find(str_source[i]);
+                
+                if(0<=idx_delimiter
+                   &&idx_delimiter<=33){
+                    if(idx_delimiter==2&&tM.brackets_minusFlag==1){
+                        tM.operatorMap[tM.mapFlag]='-';
+                        tM.strSource[tM.mapFlag]='-';
+                        tM.mapFlag+=1;
+                        tM.brackets_minusFlag=0;
+                        
+                    }
+                    //cout<<"idx_delimiter="<<idx_delimiter<<endl;
+                    tM.operatorMap[tM.mapFlag]=str_source[i];
+                    tM.strSource[tM.mapFlag]=str_source[i];
+                    tM.mapFlag+=1;
+                    //cout<<c_source[i][j]<<"  {p, "<<(idx_delimiter+2)/2<<"}"<<endl;
+                }
+            }
+            if(str_source[i]=='/'){
+                if(str_source[i+1]=='/'){
+                    idx_delimiter = str_delimiter.find("//");
+                    tM.operatorMap[tM.mapFlag]="//";
+                    tM.strSource[tM.mapFlag]="//";
+                    tM.mapFlag+=1;
+                    //cout<<"//"<<"  {p, "<<(idx_delimiter+2)/2<<"}"<<endl;
+                }
+                if(str_source[i+1]=='*'){
+                    idx_delimiter = str_delimiter.find("/*");
+                    tM.operatorMap[tM.mapFlag]="/*";
+                    tM.strSource[tM.mapFlag]="/*";
+                    tM.mapFlag+=1;
+                    //cout<<"/*"<<"  {p, "<<(idx_delimiter+2)/2<<"}"<<endl;
+                }
+            }
+            if(str_source[i]=='*'){
+                if(str_source[i+1]=='/'){
+                    idx_delimiter = str_delimiter.find("*/");
+                    tM.operatorMap[tM.mapFlag]="*/";
+                    tM.strSource[tM.mapFlag]="*/";
+                    tM.mapFlag+=1;
+                    //cout<<"*/"<<"  {p, "<<(idx_delimiter+2)/2-1<<"}"<<endl;
+                }
+            }
+            continue;
+        }
+    
+    
+    }
+    
+    fsource.close();
+/*
     cout<<"-----------字符串-----------"<<endl;
     for(tM.iterStr=tM.strMap.begin();tM.iterStr != tM.strMap.end();tM.iterStr++){
         cout<<tM.iterStr->first<<" "<<tM.iterStr->second<<endl;
@@ -469,7 +598,14 @@ int cifaFenxi(){
         cout<<tM.iterCount->first<<" "<<tM.iterCount->second<<endl;
         oftoken<<tM.iterCount->second<<"  { c, "<<tM.iterCount->first<<" }"<<endl;
     }
-   
+
+    */
+    
+    cout<<"-----------token 序列------------"<<endl;
+    for(tM.iterStrSource=tM.strSource.begin();tM.iterStrSource!=tM.strSource.end();tM.iterStrSource++){
+        cout<<tM.iterStrSource->first<<" "<<tM.iterStrSource->second<<endl;
+    }
     oftoken.close();
-    return 0;
+  
 }
+
