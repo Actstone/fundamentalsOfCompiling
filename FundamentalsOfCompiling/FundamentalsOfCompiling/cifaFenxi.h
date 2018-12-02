@@ -248,7 +248,7 @@ void cifaFenxi(){
            /* if((('0'<=str_source[i]&&str_source[i]<='9')&&str_source[i-1]=='=')||(str_source[i]=='-'&&(str_source[i-1]=='='||str_source[i-1]=='\n'))||(('0'<=str_source[i]&&str_source[i]<='9')&&str_source[i-1]=='['))*/
             
             {
-                if(str_source[i]=='-'){
+                if(str_source[i]=='-'){// 识别为减号
                     if((str_source[i+1]<='z'&&str_source[i+1]>='a')||
                        (str_source[i+1]<='Z'&&str_source[i+1]>='A')){
                         //这种情况识别减号。
@@ -261,13 +261,17 @@ void cifaFenxi(){
                     }
                 }
                 
-                while (('0'<=str_source[i]&&str_source[i]<='9')||
+                while (('0'<=str_source[i]
+                        &&str_source[i]<='9')||
                        str_source[i]=='e'||
                        str_source[i]=='-'||
                        str_source[i]=='.')
                 {
-                    if(str_source[i]=='-'){
-                        if(str_source[i-1]>='0'&&str_source[i-1]<='9'){
+                    if(str_source[i]=='-'){// 识别为减号
+                        if((str_source[i-1]>='0'&&str_source[i-1]<='9')||
+                           (str_source[i-1]>='a'&&str_source[i-1]<'e')||
+                           (str_source[i-1]>'e'&&str_source[i-1]<='z')||
+                           (str_source[i-1]>='A'&&str_source[i-1]<='Z')){
                             break;
                         }
                         if(str_source[i-1]!='e'){
@@ -284,6 +288,7 @@ void cifaFenxi(){
                             minusNum +=1;
                             continue;
                         }
+                        
                         if(minusNum>1){
                             break;
                         }
